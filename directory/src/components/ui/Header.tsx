@@ -17,7 +17,7 @@ function header() {
     <div className='header'>
         <div className="header-container">
             <div className="header-container-left">
-                <h1 id='headerTitle'>Threads</h1>
+                <h1 id='headerTitle' onClick={() => router.push('/')}>Threads</h1>
             </div>
             <div className="header-container-right">
 

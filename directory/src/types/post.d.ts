@@ -12,7 +12,7 @@ interface Thread {
 	title: string;
 	description: string;
 	creationDate: Date;
-	creator: User; //ändra från optional
+	creator: User; 
 	comments?: ThreadComment[];
 	status: boolean;
 }
@@ -24,10 +24,11 @@ type QNAThread =  Thread & { //Type extension
 }
 
 type ThreadComment = {
-	id: User; //kan skapa buggar
+	id: string;
 	thread: Thread;
 	content: string;
-	creator: "GUEST"; //ändra
+	creator: User; 
+	isAnswer?: boolean;
 }
 
 type SubmitForm = {

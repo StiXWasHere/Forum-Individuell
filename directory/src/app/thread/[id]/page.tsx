@@ -2,10 +2,14 @@
 import React from 'react'
 import { useEffect, useState } from 'react'
 import Header from '@/components/ui/Header'
+import decipherUser from '@/lib/decipherUser'
+import findUser from '@/lib/findUser'
 
 type Comment = {
+    id: string;
     content: string;
-    creator: "GUEST"; //ändra till string
+    creator: User; //ändra till string
+    isAnswer?: boolean;
 }
 
 type Data = {
@@ -34,6 +38,8 @@ function Thread() {
     const [newComment, setNewComment] = useState<string>("");
   
     const key = "forum/threads"; // Adjust this key as needed
+
+    const token = sessionStorage.getItem('forum/token')
   
     useEffect(() => {
       const getIdFromUrl = () => {
@@ -63,6 +69,8 @@ function Thread() {
     }, [])
 
     //useEffect ends here
+
+
   
     const handleCommentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       setNewComment(e.target.value);
@@ -70,12 +78,20 @@ function Thread() {
   
     const handleCommentSubmit = (e: React.FormEvent) => {
       e.preventDefault();
+
+      if(!token) return
+
+      const username = decipherUser(token)
+
+      const activeUser = findUser(username)
+
+      if(!activeUser) return
   
       if (newComment.trim() === "") return;
   
       const updatedComments: Comment[] = [
         ...data.comments,
-        { content: newComment, creator: "GUEST" }, //ändra GUEST
+        {id:crypto.randomUUID() , content: newComment, creator: activeUser, isAnswer: false },
       ];
   
       const updatedData = {
@@ -102,9 +118,38 @@ function Thread() {
           console.error("Failed to update data in localStorage", error); //ändra error meddelande från console.log om ni vill
         }
       }
+
+      
   
       setData(updatedData);
       setNewComment("");
+    };
+
+    const handleAnswerToggle = (id: string) => {
+      const updatedComments = data.comments.map(comment => 
+        comment.id === id ? { ...comment, isAnswer: !comment.isAnswer } : comment
+      );
+
+      const updatedData = { ...data, comments: updatedComments };
+
+      // Update localStorage
+      const localData = localStorage.getItem(key);
+
+      if (localData) {
+        try {
+          const parsedArray = JSON.parse(localData) as Data[];
+          const threadIndex = parsedArray.findIndex((thread) => thread.id === threadId);
+
+          if (threadIndex !== -1) {
+            parsedArray[threadIndex] = updatedData;
+            localStorage.setItem(key, JSON.stringify(parsedArray));
+          }
+        } catch (error) {
+          console.error("Failed to update data in localStorage", error);
+        }
+      }
+
+      setData(updatedData);
     };
   
   return (                                          //Kolla över och lägg in ytterligare information så som creator
@@ -125,6 +170,8 @@ function Thread() {
                 </p>
             </div>
             <div className="d-thread-container-create-comment">
+
+              {token? (
                 <form onSubmit={handleCommentSubmit} className='d-thread-container-create-comment'>
                     <div className="d-thread-container-create-comment-input">
                         <label htmlFor="commentField" className='d-thread-label'>Write a comment</label>
@@ -134,13 +181,30 @@ function Thread() {
                         <button type='submit' id='postCommentBtn'>Post</button>
                     </div>
                 </form>
+              ) : (
+                <p id='dThreadCommentPrompt'>Sign in to comment</p>
+              )}
+
+                
             </div>
             <div className="d-thread-container-bottom">
                 <h3 id='commentLabel'>Comments</h3>
                 {data.comments.map((comment, index) => (
-                        <div key={index} className="d-thread-container-bottom-comment">
-                            <span className='comment-name'>{comment.creator}</span>
+                        <div key={index} className={`d-thread-container-bottom-comment${comment.isAnswer ? '-answer' : ''}`}>
+                          <div className="d-thread-container-bottom-comment-left">
+                            <span className='comment-name'>{comment.creator.userName}</span>
                             <p className='comment-text'>{comment.content}</p>    
+                          </div>
+                          <div className="d-thread-container-bottom-comment-right">
+                            {token && data.category === 'QNA' && (
+                            <span
+                              id='commentAnswerText'
+                              className={comment.isAnswer ? "marked-as-answer" : ""}
+                              onClick={() => handleAnswerToggle(comment.id)}>
+                              {comment.isAnswer ? "Unmark answer" : "Mark answer"}
+                            </span>
+                            )}
+                          </div>
                         </div>
                     ))}
             </div>
