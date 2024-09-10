@@ -12,6 +12,8 @@ import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
 import { validate } from './validate'
+import decipherUser from '@/lib/decipherUser'
+import findUser from '@/lib/findUser'
 
 export const Create = () => {
   const [form, setForm] = useState<SubmitForm>({
@@ -19,15 +21,27 @@ export const Create = () => {
     description: ''
   })
 
- 
-  
+ const token = sessionStorage.getItem('forum/token')
+
+ if(!token) {
+  return
+ }
+
+ const router = useRouter()
+
+ const username = decipherUser(token)
+
+ const activeUser = findUser(username)
+
+
+
   const [error, setError] = useState<ErrorForm>({
     title:'',
     description:'',
     selection:''
   })
   const [selection, setSelection] = useState<ThreadCategory | string>('')
-  const router = useRouter()
+  
 
 
   function onChangeHandler(e: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLTextAreaElement>) {
@@ -44,8 +58,13 @@ export const Create = () => {
   function onSubmit(e:React.FormEvent<HTMLFormElement>){
     e.preventDefault()
 
+    
+
     if(!validate(form,selection,setError)){
       return
+    } 
+    if(activeUser == null) {
+    return
     }
     try {
       const newSubject:Thread = {
@@ -54,6 +73,8 @@ export const Create = () => {
           title:form.title,
           description: form.description,
           creationDate:new Date,
+          creator: activeUser,
+          status: false,
       }
 
       const newSubjectString = JSON.stringify(newSubject)
@@ -76,6 +97,10 @@ export const Create = () => {
     }
     
 
+  }
+
+  if(!token) {
+    router.push('/')
   }
 
   return (

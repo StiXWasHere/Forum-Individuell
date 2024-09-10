@@ -93,7 +93,20 @@ body {
 
 }
 .header-container-right {
-
+  display: flex;
+  gap: 1rem;
+}
+.user-btn {
+  width: 4rem;
+  height: 2rem;
+  background-color: blue;
+  box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.7);
+  border: none;
+  border-radius: .4rem;
+  color: white;
+}
+.user-btn:hover {
+  background-color: rgba(0, 0, 255, 0.5);
 }
 
 /*------------signup page---------*/
@@ -353,7 +366,16 @@ body {
   align-items: center;
 }
 .threadbox-top-right {
-
+  display: flex;
+  gap: 1rem;
+}
+#threadLockedText {
+  background-color: red;
+  width: fit-content;
+  color: white;
+  font-weight: bold;
+  padding-inline: .4rem;
+  border-radius: .5rem;
 }
 .threadbox-title {
   font-size: 1.1rem;
@@ -367,11 +389,36 @@ body {
 }
 .threadbox-bottom {
   display: flex;
-  justify-content: end;
+  justify-content: space-between;
 }
 
 .threadbox:hover {
-  background-color: rgba(158, 148, 148, 0.7);
+  background-color: rgba(189, 186, 186, 0.7);
+}
+.threadbox-lock-btn {
+  cursor: pointer;
+}
+#btnLock {
+  width: 8rem;
+  height: 2rem;
+  background-color: rgb(92, 92, 92);
+  color: white;
+  border-radius: .5rem;
+  box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+}
+#btnLock:hover {
+  background-color: rgba(92, 92, 92, 0.7);
+}
+#btnUnlock {
+  width: 8rem;
+  height: 2rem;
+  background-color: rgb(56, 192, 255);
+  color: white;
+  border-radius: .5rem;
+  box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+}
+#btnUnlock:hover {
+  background-color: rgba(56, 192, 255, 0.7);
 }
 .thread-container-top-home{
   display: flex;

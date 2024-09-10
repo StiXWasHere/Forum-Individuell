@@ -2,6 +2,10 @@
 import React from 'react'
 import bcrypt from 'bcryptjs'
 import { useState } from 'react'
+import { useRouter } from 'next/navigation';
+import jwt from 'jsonwebtoken';
+
+
 
 
 function page() {
@@ -10,43 +14,47 @@ function page() {
   const [registerPassword, setRegisterPassword] = useState<string>('')
   const [statusMsg, setStatusMsg] = useState<string>('')
 
+  const router = useRouter()
+
   const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setRegisterUsername(e.target.value)
   }
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.trim(); // Ensure no extra spaces
-    setRegisterPassword(value);
+    const value = e.target.value.trim()
+    setRegisterPassword(value)
   }
 
   async function verifyPassword(inputPassword: string): Promise<string> {
-    const oldStorage = localStorage.getItem('forum/users');
-    let allUsers: User[] = [];
+    const oldStorage = localStorage.getItem('forum/users')
+    let allUsers: User[] = []
   
-    // Parse users from local storage
     if (oldStorage !== null) {
-      allUsers = JSON.parse(oldStorage);
+      allUsers = JSON.parse(oldStorage)
     }
   
-    // Find the user with the matching username
-    const user = allUsers.find((user: User) => user.userName === registerUsername);
+    const user = allUsers.find((user: User) => user.userName === registerUsername)
   
-    // If user is not found, return an error message
     if (!user) {
-      return 'Username not found';
+      return 'Username not found'
     }
   
-    const storedHashedPassword = user.password; // Retrieve the hashed password for the found user
+    const storedHashedPassword = user.password
   
     try {
-      // Compare the input password with the stored hashed password
-      const isMatch: boolean = await bcrypt.compare(inputPassword, storedHashedPassword);
+      const isMatch: boolean = await bcrypt.compare(inputPassword, storedHashedPassword)
       
-      return isMatch ? 'Password is correct' : 'Password is incorrect';
+      return isMatch ? 'Password is correct' : 'Password is incorrect'
     } catch (error) {
-      console.error('Error verifying password:', error);
-      return 'Error verifying password';
+      console.error('Error verifying password:', error)
+      return 'Error verifying password'
     }
+  }
+
+  const generateToken = (username: string): string => {
+    const expiry = new Date()
+    expiry.setHours(expiry.getHours() + 1)
+    return btoa(`${username}:${expiry.toISOString()}`) // Base64 encode
   }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -54,6 +62,14 @@ function page() {
     
     const result = await verifyPassword(registerPassword)
     setStatusMsg(result)
+
+    if(result == 'Password is correct') {
+      const token = generateToken(registerUsername)
+      sessionStorage.setItem('forum/token', token)
+
+
+      router.push('/')
+    }
   }
 
   return (

@@ -15,6 +15,7 @@ type Data = {
     description: string;
     creationDate: string;
     comments: Comment[]; //lägg in user någonstans här
+    creator: User;
   };
 
 function Thread() {
@@ -25,6 +26,7 @@ function Thread() {
       description: "",
       creationDate: "",
       comments: [], //här med
+      creator: { userName: "", userId: "", password: "" },
     });
   
     const [threadId, setThreadId] = useState<string>("");
@@ -112,7 +114,7 @@ function Thread() {
         <div className="d-thread-container">
             <div className="d-thread-container-top">
               <div className="d-thread-container-top-width">
-                <span className='d-thread-poster'>Peter</span>
+                <span className='d-thread-poster'>{data.creator.userName}</span>
                 <span className='d-thread-category'>{data.category}</span>
               </div>
                 <h2 className='d-thread-title'>{data.title}</h2>

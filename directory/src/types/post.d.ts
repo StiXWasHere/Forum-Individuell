@@ -12,8 +12,9 @@ interface Thread {
 	title: string;
 	description: string;
 	creationDate: Date;
-	creator?: User; //ändra från optional
+	creator: User; //ändra från optional
 	comments?: ThreadComment[];
+	status: boolean;
 }
 
 type QNAThread =  Thread & { //Type extension

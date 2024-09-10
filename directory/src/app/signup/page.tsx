@@ -2,8 +2,7 @@
 import React from 'react'
 import bcrypt from 'bcryptjs'
 import { useState } from 'react'
-import { Router, useRouter } from 'next/router'
-import { redirect } from 'react-router-dom'
+import { useRouter } from 'next/navigation';
 
 
 async function hashPassword(password: string): Promise<string | undefined> {
@@ -17,24 +16,13 @@ async function hashPassword(password: string): Promise<string | undefined> {
   }
 }
 
-async function storeUsername(username:string): Promise<void> {
-
-  try {
-    localStorage.setItem('username', username)
-    console.log('Username stored')
-  }
-  catch(error) {
-    console.error('Error setting username', error)
-  }
-  
-}
-
 
 function page() {
 
+  const router = useRouter()
+
   const [registerUsername, setRegisterUsername] = useState<string>('')
   const [registerPassword, setRegisterPassword] = useState<string>('')
-  const [protectedPassword, setProtectedPassword] = useState<string>('')
   const [statusMsg, setStatusMsg] = useState<string>('')
 
   const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -43,29 +31,20 @@ function page() {
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setRegisterPassword(e.target.value)
-    handlePasswordProtection()
   }
 
-  const handlePasswordProtection = async () => {
 
-    try {
-      const hashedPassword = await hashPassword(registerPassword)
-      if (hashedPassword) {
-        setProtectedPassword(hashedPassword)
-      }
-    } catch (error) {
-      console.error('Error hashing the password:', error)
-    }
-  }
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+
+    if (registerUsername.trim() === "") return setStatusMsg('Please enter a username')
+    if (registerPassword.trim() === "") return setStatusMsg('Please enter a password')
 
     try {
       const newSubject:User = {
         userName:registerUsername,
         userId:crypto.randomUUID(),
-        password:protectedPassword,
+        password: await hashPassword(registerPassword) || ""
       }
 
       const newSubjectString = JSON.stringify(newSubject)
@@ -76,9 +55,6 @@ function page() {
       if(oldStorage !==  null){
        allUsers = JSON.parse(oldStorage)
       }
-
-      if (registerUsername.trim() === "") return setStatusMsg('Please enter a username')
-      if (protectedPassword.trim() === "") return setStatusMsg('Please enter a password')
 
       const usernameExists = allUsers.some((user: User) => user.userName === registerUsername)
 
@@ -95,6 +71,8 @@ function page() {
        console.log('New user saved')
 
       setStatusMsg('New user saved')
+
+      router.push('/signin')
     } catch (error) {
       console.log('could not create new user',error)
       setStatusMsg('Something went wrong')

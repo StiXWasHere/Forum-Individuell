@@ -1,6 +1,18 @@
+'use client'
 import React from 'react'
+import { useRouter } from 'next/navigation';
 
 function header() {
+
+  const router = useRouter()
+
+  const token = sessionStorage.getItem('forum/token')
+
+  const logout = () => {
+    sessionStorage.removeItem('forum/token');
+    location.reload()
+  }
+
   return (
     <div className='header'>
         <div className="header-container">
@@ -8,7 +20,18 @@ function header() {
                 <h1 id='headerTitle'>Threads</h1>
             </div>
             <div className="header-container-right">
-                <button>test</button>
+
+                {token? (
+                  <>
+                    <button className='user-btn' onClick={logout}>Log out</button>
+                  </>
+                ): (                  
+                  <>
+                    <button className='user-btn' onClick={() => router.push('/signup')}>Sign up</button>
+                    <button className='user-btn' onClick={() => router.push('/signin')}>Sign in</button>
+                  </>
+                )}
+
             </div>
         </div>
 
