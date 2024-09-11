@@ -26,7 +26,6 @@ const LandingPage: React.FC = () => {
       }
       console.log("getting threads", threads) 
       setThreads(threads);
-      console.log(threads);
     }
     getData();
   }, []);
